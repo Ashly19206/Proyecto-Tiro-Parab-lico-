@@ -1,0 +1,447 @@
+Tiro parabolico · HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tiro Parabólico</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap');
+ 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    body {
+      font-family: 'Nunito', sans-serif;
+      text-align: center;
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+ 
+    .screen { display: none; padding: 30px 20px; min-height: 100vh; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+ 
+    /* ── INTRO ── */
+    #intro h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3rem;
+      color: #f0a500;
+      text-shadow: 0 0 20px rgba(240,165,0,0.6);
+      margin-bottom: 10px;
+    }
+ 
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 25px 35px;
+      margin: 15px 0;
+      max-width: 500px;
+      width: 100%;
+    }
+ 
+    .card p { font-size: 1rem; color: #cdd6f4; line-height: 1.6; }
+    .card .field { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .card .field:last-child { border-bottom: none; }
+    .card .label { color: #89b4fa; font-weight: 700; }
+    .card .value { color: #cdd6f4; }
+ 
+    .theory-text {
+      font-size: 1.05rem;
+      color: #cdd6f4;
+      line-height: 1.7;
+    }
+ 
+    /* ── BOTONES ── */
+    button {
+      font-family: 'Fredoka One', cursive;
+      padding: 14px 36px;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #f0a500, #e05d00);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 10px;
+      box-shadow: 0 4px 20px rgba(240,165,0,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.5px;
+    }
+    button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(240,165,0,0.5); }
+    button:active { transform: translateY(0); }
+ 
+    button.secondary {
+      background: linear-gradient(135deg, #74c7ec, #5a9fd4);
+      box-shadow: 0 4px 20px rgba(116,199,236,0.4);
+    }
+ 
+    /* ── GAME ── */
+    #game h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: #f0a500;
+      margin-bottom: 15px;
+    }
+ 
+    #score {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: #a6e3a1;
+      margin-bottom: 12px;
+    }
+ 
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 15px 25px;
+    }
+ 
+    .control-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .control-group label { font-size: 0.8rem; color: #89b4fa; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+ 
+    input {
+      padding: 8px 12px;
+      width: 90px;
+      text-align: center;
+      border: 2px solid rgba(240,165,0,0.4);
+      border-radius: 10px;
+      font-size: 1.1rem;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: #f0a500; }
+ 
+    canvas {
+      border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.15);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      max-width: 100%;
+    }
+ 
+    #datos {
+      margin-top: 14px;
+      font-size: 0.95rem;
+      color: #cdd6f4;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 10px 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+ 
+    .dato-item { display: flex; align-items: center; gap: 6px; }
+    .dato-item span.icon { font-size: 1.2rem; }
+    .dato-item span.val { font-weight: 700; color: #f0a500; }
+ 
+    /* ── RESUMEN ── */
+    #resumenPantalla h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.5rem;
+      color: #f0a500;
+      margin-bottom: 20px;
+    }
+ 
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      max-width: 480px;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+ 
+    .resumen-item {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 18px;
+    }
+ 
+    .resumen-item .ri-label { font-size: 0.8rem; color: #89b4fa; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .resumen-item .ri-val { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: #f0a500; margin-top: 4px; }
+ 
+    .stars { font-size: 2.5rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+ 
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <h1>🚀 Tiro Parabólico</h1>
+ 
+  <div class="card">
+    <div class="field"><span class="label">Nombre</span><span class="value">Ashly Naomy Urlá Barillas</span></div>
+    <div class="field"><span class="label">Carnet</span><span class="value">5990-25-5801</span></div>
+    <div class="field"><span class="label">Sede</span><span class="value">Chinautla</span></div>
+    <div class="field"><span class="label">Carrera</span><span class="value">Ingeniería en Sistemas</span></div>
+  </div>
+ 
+  <div class="card">
+    <p class="theory-text">
+      🎯 El <strong>tiro parabólico</strong> es el movimiento de un objeto lanzado con
+      velocidad inicial que sigue una trayectoria en forma de <strong>parábola</strong>
+      debido a la acción de la gravedad. Combina un movimiento horizontal uniforme
+      y un movimiento vertical uniformemente acelerado.
+    </p>
+  </div>
+ 
+  <button onclick="startGame()"> INICIAR </button>
+</div>
+ 
+<!-- JUEGO -->
+<div id="game" class="screen">
+  <h1>🎯 Simulación de Tiro Parabólico</h1>
+  <p id="score">⭐ Puntos: 0</p>
+ 
+  <div class="controls">
+    <div class="control-group">
+      <label>Ángulo (°)</label>
+      <input type="number" id="angulo" value="45" min="1" max="89">
+    </div>
+    <div class="control-group">
+      <label>Velocidad (m/s)</label>
+      <input type="number" id="velocidad" value="20" min="1" max="60">
+    </div>
+    <button onclick="lanzar()">🚀 Lanzar</button>
+  </div>
+ 
+  <canvas id="canvas" width="800" height="400"></canvas>
+ 
+  <div id="datos">
+    <div class="dato-item"><span class="icon">⏱️</span> Tiempo: <span class="val" id="dTiempo">0.00</span> s</div>
+    <div class="dato-item"><span class="icon">⛰️</span> Altura: <span class="val" id="dAltura">0.00</span> m</div>
+    <div class="dato-item"><span class="icon">📏</span> Distancia: <span class="val" id="dDist">0.00</span> m</div>
+  </div>
+</div>
+ 
+<!-- RESUMEN -->
+<div id="resumenPantalla" class="screen">
+  <div class="stars" id="starsDisplay">🌟🌟🌟</div>
+  <h2>📊 Resumen del Lanzamiento</h2>
+ 
+  <div class="resumen-grid">
+    <div class="resumen-item">
+      <div class="ri-label">Ángulo</div>
+      <div class="ri-val" id="rAngulo">—</div>
+    </div>
+    <div class="resumen-item">
+      <div class="ri-label">Velocidad Inicial</div>
+      <div class="ri-val" id="rVel">—</div>
+    </div>
+    <div class="resumen-item">
+      <div class="ri-label">Altura Máxima</div>
+      <div class="ri-val" id="rAltura">—</div>
+    </div>
+    <div class="resumen-item">
+      <div class="ri-label">Distancia Total</div>
+      <div class="ri-val" id="rDist">—</div>
+    </div>
+    <div class="resumen-item">
+      <div class="ri-label">Tiempo de Vuelo</div>
+      <div class="ri-val" id="rTiempo">—</div>
+    </div>
+    <div class="resumen-item">
+      <div class="ri-label">Puntos Totales</div>
+      <div class="ri-val" id="rPuntos">—</div>
+    </div>
+  </div>
+ 
+  <button onclick="volverJuego()">🔄 Volver a Jugar</button>
+  <button class="secondary" onclick="volverIntro()">🏠 Inicio</button>
+</div>
+ 
+<script>
+  let puntos = 0;
+  let animId = null;
+ 
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const g = 0.3;
+  const ESCALA = 10; // 10 px = 1 metro
+ 
+  function startGame() {
+    show("game");
+  }
+ 
+  function volverJuego() {
+    show("game");
+  }
+ 
+  function volverIntro() {
+    show("intro");
+  }
+ 
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+ 
+  function drawScene() {
+    // Sky background
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 370);
+    skyGrad.addColorStop(0, "#1a1a4e");
+    skyGrad.addColorStop(1, "#2d6a9f");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+ 
+    // Stars
+    ctx.fillStyle = "rgba(255,255,200,0.6)";
+    const starPositions = [[50,30],[130,15],[300,20],[450,10],[600,25],[700,12],[760,35]];
+    starPositions.forEach(([sx,sy]) => {
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+ 
+    // Moon
+    ctx.fillStyle = "#fff5b0";
+    ctx.beginPath();
+    ctx.arc(720, 55, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2d6a9f";
+    ctx.beginPath();
+    ctx.arc(730, 48, 22, 0, Math.PI * 2);
+    ctx.fill();
+ 
+    // Cloud
+    ctx.fillStyle = "rgba(255,255,255,0.15)";
+    [[180,70,30],[210,70,30],[195,55,28]].forEach(([cx,cy,r]) => {
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    });
+ 
+    // Mountains
+    ctx.fillStyle = "#1a3a5c";
+    ctx.beginPath();
+    ctx.moveTo(0,370); ctx.lineTo(120,240); ctx.lineTo(240,370); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(160,370); ctx.lineTo(310,210); ctx.lineTo(460,370); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(380,370); ctx.lineTo(520,260); ctx.lineTo(660,370); ctx.closePath(); ctx.fill();
+ 
+    // Ground
+    const groundGrad = ctx.createLinearGradient(0,370,0,400);
+    groundGrad.addColorStop(0,"#2d6a4f");
+    groundGrad.addColorStop(1,"#1b4332");
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, 370, 800, 30);
+ 
+    // Tree
+    ctx.fillStyle = "#5c3d1e";
+    ctx.fillRect(710, 310, 16, 62);
+    ctx.fillStyle = "#40916c";
+    ctx.beginPath(); ctx.arc(718, 285, 38, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#52b788";
+    ctx.beginPath(); ctx.arc(710, 275, 25, 0, Math.PI*2); ctx.fill();
+  }
+ 
+  function lanzar() {
+    if (animId) cancelAnimationFrame(animId);
+ 
+    const anguloGrados = parseFloat(document.getElementById("angulo").value);
+    const velocidad = parseFloat(document.getElementById("velocidad").value);
+ 
+    if (isNaN(anguloGrados) || isNaN(velocidad) || anguloGrados <= 0 || anguloGrados >= 90 || velocidad <= 0) {
+      alert("Por favor ingresa valores válidos (ángulo entre 1-89°, velocidad > 0)");
+      return;
+    }
+ 
+    const angulo = anguloGrados * Math.PI / 180;
+    let x = 50, y = 350;
+    let vx = velocidad * Math.cos(angulo);
+    let vy = -velocidad * Math.sin(angulo);
+    let trayectoria = [];
+    let tiempo = 0;
+    let alturaMax = 0;
+ 
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawScene();
+ 
+      // Trajectory
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(240,165,0,0.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      trayectoria.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+ 
+      // Ball glow
+      const glow = ctx.createRadialGradient(x, y, 2, x, y, 18);
+      glow.addColorStop(0, "rgba(255,200,50,0.8)");
+      glow.addColorStop(1, "rgba(255,100,0,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
+ 
+      // Ball
+      ctx.beginPath();
+      ctx.arc(x, y, 11, 0, Math.PI * 2);
+      const ballGrad = ctx.createRadialGradient(x-4, y-4, 2, x, y, 11);
+      ballGrad.addColorStop(0, "#ffe66d");
+      ballGrad.addColorStop(1, "#f0a500");
+      ctx.fillStyle = ballGrad;
+      ctx.fill();
+ 
+      // Update physics
+      x += vx;
+      y += vy;
+      vy += g;
+      tiempo += 0.05;
+      trayectoria.push({ x, y });
+ 
+      const alturaActual = Math.max(0, 350 - y);
+      if (alturaActual > alturaMax) alturaMax = alturaActual;
+      const distanciaActual = x - 50;
+ 
+      document.getElementById("dTiempo").textContent = tiempo.toFixed(2);
+      document.getElementById("dAltura").textContent = (alturaActual / ESCALA).toFixed(2);
+      document.getElementById("dDist").textContent = (distanciaActual / ESCALA).toFixed(2);
+ 
+      // Hit ground
+      if (y >= 358 || x > canvas.width + 20) {
+        puntos++;
+        document.getElementById("score").textContent = "⭐ Puntos: " + puntos;
+ 
+        // Fill in summary (converted to real units)
+        document.getElementById("rAngulo").textContent = anguloGrados + "°";
+        document.getElementById("rVel").textContent = velocidad + " m/s";
+        document.getElementById("rAltura").textContent = (alturaMax / ESCALA).toFixed(2) + " m";
+        document.getElementById("rDist").textContent = (distanciaActual / ESCALA).toFixed(2) + " m";
+        document.getElementById("rTiempo").textContent = tiempo.toFixed(2) + " s";
+        document.getElementById("rPuntos").textContent = puntos;
+ 
+        // Stars based on height
+        const stars = alturaMax / ESCALA > 15 ? "🌟🌟🌟" : alturaMax / ESCALA > 8 ? "🌟🌟" : "🌟";
+        document.getElementById("starsDisplay").textContent = stars;
+ 
+        setTimeout(() => show("resumenPantalla"), 400);
+        return;
+      }
+ 
+      animId = requestAnimationFrame(draw);
+    }
+ 
+    draw();
+  }
+ 
+  // Draw initial scene
+  drawScene();
+</script>
+</body>
+</html>
